@@ -30,6 +30,72 @@ def test_comments_are_copied_through():
     """)
 
 
+def test_transaction_is_translated():
+    """Ensure we use beancount quoted payee syntax and two-space indent"""
+    input = from_triple_quoted_string("""
+    2017-01-02 An ordinary transaction
+        Expenses:Restaurants    40 USD
+        Assets:Cash
+    """)
+    output = translate_file(input)
+    assert output == from_triple_quoted_string("""
+    * Accounts
+    2010-01-01 open Assets:Cash
+    2010-01-01 open Expenses:Restaurants
+    * Transactions
+    2017-01-02 * "An ordinary transaction"
+      Expenses:Restaurants        40 USD
+      Assets:Cash
+    """)
+
+
+def test_currency_is_translated():
+    """$40 -> 40 USD"""
+    input = from_triple_quoted_string("""
+    2017-01-02 An ordinary transaction
+        Expenses:Restaurants    $40
+        Assets:Cash
+    """)
+    output = translate_file(input)
+    assert output == from_triple_quoted_string("""
+    * Accounts
+    2010-01-01 open Assets:Cash
+    2010-01-01 open Expenses:Restaurants
+    * Transactions
+    2017-01-02 * "An ordinary transaction"
+      Expenses:Restaurants        40 USD
+      Assets:Cash
+    """)
+
+
+def test_balance_assertions_are_translated():
+    input = from_triple_quoted_string("""
+    2017-01-02 Blah blah
+        Assets:Cash   = $40
+    """)
+    output = translate_file(input)
+    assert output == from_triple_quoted_string("""
+    * Accounts
+    2010-01-01 open Assets:Cash
+    * Transactions
+    2017-01-02 balance Assets:Cash   40 USD
+    """)
+
+
+def test_allow_balance_assertions_with_zero():
+    input = from_triple_quoted_string("""
+    2017-01-02 Blah blah
+        Assets:Cash   $0 = $40
+    """)
+    output = translate_file(input)
+    assert output == from_triple_quoted_string("""
+    * Accounts
+    2010-01-01 open Assets:Cash
+    * Transactions
+    2017-01-02 balance Assets:Cash   40 USD
+    """)
+
+
 def test_comments_are_preserved_after_statements():
     input = from_triple_quoted_string("""
     2017-01-02 An ordinary transaction   ; Payee comment

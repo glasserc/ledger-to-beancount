@@ -112,8 +112,8 @@ def translate_file(file_lines):
 
                 (date, _) = current_entry[0].split(' ', 1)
 
-                balance_assertion = '{} balance {} {}'.format(
-                    date, account, translate_amount(balance))
+                balance_assertion = '{} balance {}   {}'.format(
+                    date, account, translate_amount(balance.strip()))
 
                 current_entry = [
                     reattach_comment(balance_assertion, comment)
