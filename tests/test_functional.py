@@ -51,6 +51,42 @@ def test_transaction_is_translated():
     """)
 
 
+def test_account_name_is_translated():
+    input = from_triple_quoted_string("""
+    2017-01-02 An ordinary transaction
+        Expenses:Eating Out    40 USD
+        Assets:Cash
+    """)
+    output = translate_file(input)
+    assert output == from_triple_quoted_string("""
+    * Accounts
+    2010-01-01 open Assets:Cash
+    2010-01-01 open Expenses:EatingOut
+    * Transactions
+    2017-01-02 * "An ordinary transaction"
+      Expenses:EatingOut        40 USD
+      Assets:Cash
+    """)
+
+
+def test_payee_quotes_are_translated():
+    input = from_triple_quoted_string("""
+    2017-01-02 Eating at my "favorite" restaurant
+        Expenses:Restaurants    40 USD
+        Assets:Cash
+    """)
+    output = translate_file(input)
+    assert output == from_triple_quoted_string("""
+    * Accounts
+    2010-01-01 open Assets:Cash
+    2010-01-01 open Expenses:Restaurants
+    * Transactions
+    2017-01-02 * "Eating at my \\"favorite\\" restaurant"
+      Expenses:Restaurants        40 USD
+      Assets:Cash
+    """)
+
+
 def test_currency_is_translated():
     """$40 -> 40 USD"""
     input = from_triple_quoted_string("""
@@ -66,6 +102,52 @@ def test_currency_is_translated():
     * Transactions
     2017-01-02 * "An ordinary transaction"
       Expenses:Restaurants        40 USD
+      Assets:Cash
+    """)
+
+
+def test_negative_currency_is_translated():
+    """$-40 -> -40 USD, as is -$40"""
+    input = from_triple_quoted_string("""
+    2017-01-02 An ordinary transaction
+        Expenses:Restaurants    $-40
+        Assets:Cash
+
+    2017-01-02 Another ordinary transaction
+        Expenses:Restaurants    -$40
+        Assets:Cash
+    """)
+    output = translate_file(input)
+    assert output == from_triple_quoted_string("""
+    * Accounts
+    2010-01-01 open Assets:Cash
+    2010-01-01 open Expenses:Restaurants
+    * Transactions
+    2017-01-02 * "An ordinary transaction"
+      Expenses:Restaurants        -40 USD
+      Assets:Cash
+
+    2017-01-02 * "Another ordinary transaction"
+      Expenses:Restaurants        -40 USD
+      Assets:Cash
+    """)
+
+
+def test_fractional_currency_is_translated():
+    """$40.12 -> 40.12 USD"""
+    input = from_triple_quoted_string("""
+    2017-01-02 An ordinary transaction
+        Expenses:Restaurants    $40.12
+        Assets:Cash
+    """)
+    output = translate_file(input)
+    assert output == from_triple_quoted_string("""
+    * Accounts
+    2010-01-01 open Assets:Cash
+    2010-01-01 open Expenses:Restaurants
+    * Transactions
+    2017-01-02 * "An ordinary transaction"
+      Expenses:Restaurants        40.12 USD
       Assets:Cash
     """)
 
