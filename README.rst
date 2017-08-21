@@ -21,3 +21,21 @@ a crude syntactic translation from Ledger syntax to Beancount
 syntax. This means we have to do some extra work to parse everything,
 as well as handling aliases ourselves, but gives us access to
 everything in the original Ledger file.
+
+==============
+ Installation
+==============
+
+::
+
+  $ pip install https://github.com/glasserc/ledger-to-beancount.git
+
+Run with::
+
+  $ ledger-to-beancount <ledger file>
+
+=======
+ Tests
+=======
+
+Run with ``py.test``.
