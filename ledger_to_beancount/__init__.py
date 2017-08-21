@@ -75,7 +75,7 @@ def translate_file(file_lines):
     in_balance_assertion = False
 
     for lineno, line in enumerate(file_lines):
-        if line[-1] == '\n':
+        if line and line[-1] == '\n':
             line = line[:-1]
 
         significant = line.strip()
