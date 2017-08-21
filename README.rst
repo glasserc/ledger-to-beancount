@@ -14,3 +14,10 @@ transactions. This means it doesn't include anything that isn't a
 transaction, namely a comment or a balance assertion. In my ledger
 use, these are both quite important, and I don't want to lose them or
 have to copy them over by hand.
+
+To address these concerns, we take a very different approach. Rather
+than introspect on parsed ledger data, we examine a "raw" file and do
+a crude syntactic translation from Ledger syntax to Beancount
+syntax. This means we have to do some extra work to parse everything,
+as well as handling aliases ourselves, but gives us access to
+everything in the original Ledger file.
