@@ -197,6 +197,32 @@ def test_balance_assertions_cannot_mix_with_other_postings_3():
         translate_file(input)
 
 
+def test_balance_assertions_can_mix_with_comments():
+    input = from_triple_quoted_string("""
+    2017-01-02 Blah blah
+        ; There are lots of important reasons why this is the balance
+        ; at this particular moment in time. For starters, consider
+        ; the global economic situation: a strong dollar combined with
+        ; general instability
+        Assets:Cash   = $40
+        ; which doesn't even begin to enter the local, microeconomic factors
+        ; such as my personal preference for a certain amount of cash
+    """)
+    output = translate_file(input)
+    assert output == from_triple_quoted_string("""
+    * Accounts
+    2010-01-01 open Assets:Cash
+    * Transactions
+    2017-01-02 balance Assets:Cash   40 USD
+      ; There are lots of important reasons why this is the balance
+      ; at this particular moment in time. For starters, consider
+      ; the global economic situation: a strong dollar combined with
+      ; general instability
+      ; which doesn't even begin to enter the local, microeconomic factors
+      ; such as my personal preference for a certain amount of cash
+    """)
+
+
 def test_allow_balance_assertions_with_zero():
     input = from_triple_quoted_string("""
     2017-01-02 Blah blah

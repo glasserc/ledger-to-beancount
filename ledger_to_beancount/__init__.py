@@ -124,7 +124,10 @@ def translate_file(file_lines):
             # only as single-posting transactions, with zero as the addition.
             if rest and '=' in rest:
                 in_balance_assertion = True
-                if len(current_entry) != 1:
+
+                non_commented_lines = [l for l in current_entry
+                                       if not l.lstrip().startswith(';')]
+                if len(non_commented_lines) != 1:
                     raise BalanceAssertionTooComplicated(lineno)
 
                 (augment, balance) = rest.split('=')
@@ -141,7 +144,7 @@ def translate_file(file_lines):
 
                 current_entry = [
                     reattach_comment(balance_assertion, comment)
-                ]
+                ] + current_entry[1:]
 
             # Check for posting -- transform money
             else:
