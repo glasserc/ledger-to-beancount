@@ -6,6 +6,27 @@ import dateutil.parser
 START_DATE = '2010-01-01'
 
 
+class BalanceAssertionTooComplicated(Exception):
+    """Exception signalling a balance assertion with other postings.
+
+    In the general case, this could be something like:
+
+    2017-01-02 Balance assertion
+        Assets:Cash   = $12
+        Expenses:Cash
+
+    Ledger supports this because it knows what the difference between
+    Assets:Cash's current value and the target is, and can create a
+    transaction from it. However, Beancount requires this to be split
+    into a transaction and a balance assertion, and we have no way to
+    know what the amount of the postings in the transaction are. (If
+    we did, we would have reimplemented ledger.) Instead, complain and
+    let the user sort it out.
+    """
+    def __init__(self, lineno):
+        self.lineno = lineno
+
+
 def starts_transaction(line):
     # Check if a line looks like a plausible beginning to a transaction
     if not line:  # blank lines never start transactions
@@ -103,12 +124,15 @@ def translate_file(file_lines):
             # only as single-posting transactions, with zero as the addition.
             if rest and '=' in rest:
                 in_balance_assertion = True
-                assert len(current_entry) == 1
+                if len(current_entry) != 1:
+                    raise BalanceAssertionTooComplicated(lineno)
 
                 (augment, balance) = rest.split('=')
 
-                if augment:
-                    assert Decimal(strip_currency(augment.strip())) == 0.0
+                if augment and Decimal(strip_currency(augment.strip())) != 0.0:
+                    # If the augment wasn't zero, it had to have come
+                    # from/gone to another account.
+                    raise BalanceAssertionTooComplicated(lineno)
 
                 (date, _) = current_entry[0].split(' ', 1)
 
@@ -122,10 +146,7 @@ def translate_file(file_lines):
             # Check for posting -- transform money
             else:
                 if in_balance_assertion:
-                    print("Balance assertion with leftovers on line {}.".format(lineno))
-                    print("Because this is a syntactic translation, we can't represent this in beancount.")
-                    print("Please separate this into two transactions and try again.")
-                    return 1
+                    raise BalanceAssertionTooComplicated(lineno)
 
                 if rest:
                     posting = '  {}        {}'.format(account, translate_amount(rest))

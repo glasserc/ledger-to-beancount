@@ -1,4 +1,6 @@
-from ledger_to_beancount import translate_file
+import pytest
+
+from ledger_to_beancount import translate_file, BalanceAssertionTooComplicated
 
 
 def from_triple_quoted_string(s, append_newlines=False):
@@ -80,6 +82,37 @@ def test_balance_assertions_are_translated():
     * Transactions
     2017-01-02 balance Assets:Cash   40 USD
     """)
+
+
+def test_balance_assertions_cannot_mix_with_other_postings_1():
+    input = from_triple_quoted_string("""
+    2017-01-02 Blah blah
+        Assets:Cash   = $40
+        Expenses:Cash
+    """)
+    with pytest.raises(BalanceAssertionTooComplicated):
+        translate_file(input)
+
+
+def test_balance_assertions_cannot_mix_with_other_postings_2():
+    input = from_triple_quoted_string("""
+    2017-01-02 Blah blah
+        Expenses:Cash   $40
+        Assets:Cash   = $40
+    """)
+    with pytest.raises(BalanceAssertionTooComplicated):
+        translate_file(input)
+
+
+def test_balance_assertions_cannot_mix_with_other_postings_3():
+    """This is more of a bug than a feature"""
+    input = from_triple_quoted_string("""
+    2017-01-02 Blah blah
+        Assets:Cash   $15 = $40
+        Expenses:Cash   $-15
+    """)
+    with pytest.raises(BalanceAssertionTooComplicated):
+        translate_file(input)
 
 
 def test_allow_balance_assertions_with_zero():
