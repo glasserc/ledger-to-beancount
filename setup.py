@@ -16,7 +16,7 @@ test_requirements = [
 
 entry_points = {
     'console_scripts': [
-        'ledger-to-beancount = ledger_to_beancount.__main__',
+        'ledger-to-beancount = ledger_to_beancount.__main__:main',
     ]
 }
 
