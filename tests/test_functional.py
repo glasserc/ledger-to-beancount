@@ -255,3 +255,39 @@ def test_comments_are_preserved_after_statements():
       Expenses:Restaurants        40 USD   ; Posting comment
       Assets:Cash
     """)
+
+
+def test_transform_price_to_cost_basis_buying():
+    input = from_triple_quoted_string("""
+    2017-01-02 An ordinary transaction
+        Expenses:Restaurants    40 PDX  @ $1.10
+        Assets:Cash
+    """)
+    output = translate_file(input)
+    assert output == from_triple_quoted_string("""
+    * Accounts
+    2010-01-01 open Assets:Cash
+    2010-01-01 open Expenses:Restaurants
+    * Transactions
+    2017-01-02 * "An ordinary transaction"
+      Expenses:Restaurants        40 PDX {1.10 USD}
+      Assets:Cash
+    """)
+
+
+def test_dont_transform_price_to_cost_basis_selling():
+    input = from_triple_quoted_string("""
+    2017-01-02 An ordinary transaction
+        Expenses:Restaurants    -40 PDX  @ $1.10
+        Assets:Cash
+    """)
+    output = translate_file(input)
+    assert output == from_triple_quoted_string("""
+    * Accounts
+    2010-01-01 open Assets:Cash
+    2010-01-01 open Expenses:Restaurants
+    * Transactions
+    2017-01-02 * "An ordinary transaction"
+      Expenses:Restaurants        -40 PDX @ 1.10 USD
+      Assets:Cash
+    """)

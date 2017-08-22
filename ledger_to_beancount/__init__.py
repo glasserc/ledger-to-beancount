@@ -146,17 +146,38 @@ def translate_file(file_lines):
                     reattach_comment(balance_assertion, comment)
                 ] + current_entry[1:]
 
-            # Check for posting -- transform money
+                continue
+
+            elif rest and '@' in rest:
+                # Could be a purchase or sale.
+                (amount, price) = rest.split('@')
+                if amount == translate_amount(amount):
+                    # Seems really likely to be a commodity
+                    translated_amount = translate_amount(amount)
+                    number, units = translated_amount.strip().split(' ')
+                    if Decimal(number) > 0:
+                        # A purchase!
+                        format = '  {}        {} {{{}}}'
+                    else:
+                        # Correct spacing on sales at least
+                        format = '  {}        {} @ {}'
+                    posting = format.format(account, translated_amount.strip(),
+                                            translate_amount(price).strip())
+                    current_entry.append(reattach_comment(posting, comment))
+                    continue
+                # Don't do anything special with non-commodities
+                # (currencies like $ or €)
+
+            # Another posting.
+            if in_balance_assertion:
+                raise BalanceAssertionTooComplicated(lineno)
+
+            if rest:
+                posting = '  {}        {}'.format(account, translate_amount(rest))
             else:
-                if in_balance_assertion:
-                    raise BalanceAssertionTooComplicated(lineno)
+                posting = '  {}'.format(account)
 
-                if rest:
-                    posting = '  {}        {}'.format(account, translate_amount(rest))
-                else:
-                    posting = '  {}'.format(account)
-
-                current_entry.append(reattach_comment(posting, comment))
+            current_entry.append(reattach_comment(posting, comment))
 
             # Since this continued an existing entry, skip to the next line.
             continue
