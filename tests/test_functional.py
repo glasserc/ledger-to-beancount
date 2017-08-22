@@ -291,3 +291,21 @@ def test_dont_transform_price_to_cost_basis_selling():
       Expenses:Restaurants        -40 PDX @ 1.10 USD
       Assets:Cash
     """)
+
+
+def test_translate_dates():
+    input = from_triple_quoted_string("""
+    2/6/2010 An ordinary transaction
+        Expenses:Restaurants    $40
+        Assets:Cash
+    """)
+    output = translate_file(input)
+    assert output == from_triple_quoted_string("""
+    * Accounts
+    2010-01-01 open Assets:Cash
+    2010-01-01 open Expenses:Restaurants
+    * Transactions
+    2010-02-06 * "An ordinary transaction"
+      Expenses:Restaurants        40 USD
+      Assets:Cash
+    """)
