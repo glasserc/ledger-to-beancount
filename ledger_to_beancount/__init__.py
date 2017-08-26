@@ -1,4 +1,5 @@
 from decimal import Decimal
+import functools
 import re
 
 import dateutil.parser
@@ -80,10 +81,14 @@ def strip_currency(amount):
 
 
 def translate_amount(amount):
-    amount_re = r'(-?\d*(\.\d+)?)'
-    amount = re.sub(r'\$' + amount_re, '\\1 USD', amount)
-    amount = re.sub(r'€' + amount_re, '\\1 EUR', amount)
-    amount = re.sub(r'₤' + amount_re, '\\1 GBP', amount)
+    amount_re = r'(-?(\d*(\.\d+)?))'
+    partial = functools.partial
+    def replace_number(currency, match):
+        amount = Decimal(match.group(1))
+        return '{} {}'.format(str(amount), currency)
+    amount = re.sub(r'\$' + amount_re, partial(replace_number, 'USD'), amount)
+    amount = re.sub(r'€' + amount_re, partial(replace_number, 'EUR'), amount)
+    amount = re.sub(r'₤' + amount_re, partial(replace_number, 'GBP'), amount)
     return amount
 
 

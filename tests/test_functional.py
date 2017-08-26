@@ -152,6 +152,25 @@ def test_fractional_currency_is_translated():
     """)
 
 
+def test_incomplete_decimals_are_translated():
+    """$.12 -> 0.12 USD"""
+    input = from_triple_quoted_string("""
+    2017-01-02 An ordinary transaction
+        Expenses:Restaurants    $.12
+        Assets:Cash
+    """)
+    output = translate_file(input)
+    assert output == from_triple_quoted_string("""
+    * Accounts
+    2010-01-01 open Assets:Cash
+    2010-01-01 open Expenses:Restaurants
+    * Transactions
+    2017-01-02 * "An ordinary transaction"
+      Expenses:Restaurants        0.12 USD
+      Assets:Cash
+    """)
+
+
 def test_balance_assertions_are_translated():
     input = from_triple_quoted_string("""
     2017-01-02 Blah blah
@@ -309,3 +328,21 @@ def test_translate_dates():
       Expenses:Restaurants        40 USD
       Assets:Cash
     """)
+
+def test_translate_dates():
+    input = from_triple_quoted_string("""
+    2/6/2010 An ordinary transaction
+        Expenses:Restaurants    $40
+        Assets:Cash
+    """)
+    output = translate_file(input)
+    assert output == from_triple_quoted_string("""
+    * Accounts
+    2010-01-01 open Assets:Cash
+    2010-01-01 open Expenses:Restaurants
+    * Transactions
+    2010-02-06 * "An ordinary transaction"
+      Expenses:Restaurants        40 USD
+      Assets:Cash
+    """)
+
