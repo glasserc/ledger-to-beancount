@@ -109,7 +109,12 @@ In other words:
 
   - FIXME: It would be really neat to align monetary amounts in postings!
 
-- Balance assertions are converted to beancount format.
+- Balance assertions are converted to beancount format. Note that the
+  semantics of balance assertions in Ledger and Beancount are subtly
+  different -- in Ledger, an assertion applies to any transaction that
+  came earlier in the file, but in Beancount it applies to
+  transactions up to but not including that day. You may have to
+  adjust your balance assertions manually.
 
 - Purchases, but not sales, of all assets are converted to cost bases.
 
