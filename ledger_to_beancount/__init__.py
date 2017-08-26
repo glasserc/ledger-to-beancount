@@ -214,6 +214,10 @@ def translate_file(file_lines):
         else:
             output.append(line)
 
+    # EOF ends a transaction, whether there was a newline or not.
+    if current_entry:
+        output.extend(current_entry)
+
     # Prepend any accounts we've ever encountered
     account_openings = [
         '{} open {}'.format(START_DATE, a)

@@ -51,6 +51,23 @@ def test_transaction_is_translated():
     """)
 
 
+def test_last_transaction_is_handled():
+    """Ensure that if EOF happens during a transaction, we handle it"""
+    input = from_triple_quoted_string("""
+    2017-01-02 An ordinary transaction
+        Expenses:Restaurants    40 USD
+        Assets:Cash""")
+    output = translate_file(input)
+    assert output == from_triple_quoted_string("""
+    * Accounts
+    2010-01-01 open Assets:Cash
+    2010-01-01 open Expenses:Restaurants
+    * Transactions
+    2017-01-02 * "An ordinary transaction"
+      Expenses:Restaurants        40 USD
+      Assets:Cash""")  # There won't be an extra blank line
+
+
 def test_account_name_is_translated():
     input = from_triple_quoted_string("""
     2017-01-02 An ordinary transaction
