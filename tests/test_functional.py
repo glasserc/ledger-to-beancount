@@ -221,6 +221,20 @@ def test_balance_assertions_are_translated():
     """)
 
 
+def test_balance_assertions_end_account_name():
+    input = from_triple_quoted_string("""
+    2017-01-02 Blah blah
+        Assets:Cash=$40
+    """)
+    output = translate_file(input)
+    assert output == from_triple_quoted_string("""
+    * Accounts
+    2010-01-01 open Assets:Cash
+    * Transactions
+    2017-01-02 balance Assets:Cash   40 USD
+    """)
+
+
 def test_balance_assertions_cannot_mix_with_other_postings_1():
     input = from_triple_quoted_string("""
     2017-01-02 Blah blah

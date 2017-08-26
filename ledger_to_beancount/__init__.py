@@ -116,13 +116,18 @@ def translate_file(file_lines):
                 continue
 
             account = significant
+            rest = None
+            account_end = None
             if '  ' in account:
-                account = significant[:significant.find('  ')]
+                account_end = significant.index('  ')
+            if '=' in account:
+                if account_end is None or significant.index('=') < account_end:
+                    account_end = significant.index('=')
+            if account_end is not None:
+                account = significant[:account_end]
+                rest = significant[account_end:].strip()
             account = aliases.get(account, translate_account(account))
             accounts.add(account)
-            rest = None
-            if '  ' in significant:
-                rest = significant[significant.find('  '):].strip()
 
             # Check for balance assertion.
             # FIXME: We don't support balance assertions in the general case,
