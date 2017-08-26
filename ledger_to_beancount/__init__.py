@@ -120,9 +120,6 @@ def translate_file(file_lines):
             account_end = None
             if '  ' in account:
                 account_end = significant.index('  ')
-            if '=' in account:
-                if account_end is None or significant.index('=') < account_end:
-                    account_end = significant.index('=')
             if account_end is not None:
                 account = significant[:account_end]
                 rest = significant[account_end:].strip()
