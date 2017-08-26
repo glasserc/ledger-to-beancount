@@ -69,6 +69,42 @@ def test_account_name_is_translated():
     """)
 
 
+def test_lowercase_account_name_is_translated():
+    input = from_triple_quoted_string("""
+    2017-01-02 An ordinary transaction
+        Expenses:eating out    40 USD
+        Assets:Cash
+    """)
+    output = translate_file(input)
+    assert output == from_triple_quoted_string("""
+    * Accounts
+    2010-01-01 open Assets:Cash
+    2010-01-01 open Expenses:Xeatingout
+    * Transactions
+    2017-01-02 * "An ordinary transaction"
+      Expenses:Xeatingout        40 USD
+      Assets:Cash
+    """)
+
+
+def test_invalid_account_name_is_translated():
+    input = from_triple_quoted_string("""
+    2017-01-02 An ordinary transaction
+        Expenses:Eat&Out    40 USD
+        Assets:Cash
+    """)
+    output = translate_file(input)
+    assert output == from_triple_quoted_string("""
+    * Accounts
+    2010-01-01 open Assets:Cash
+    2010-01-01 open Expenses:EatOut
+    * Transactions
+    2017-01-02 * "An ordinary transaction"
+      Expenses:EatOut        40 USD
+      Assets:Cash
+    """)
+
+
 def test_payee_quotes_are_translated():
     input = from_triple_quoted_string("""
     2017-01-02 Eating at my "favorite" restaurant
@@ -345,4 +381,3 @@ def test_translate_dates():
       Expenses:Restaurants        40 USD
       Assets:Cash
     """)
-

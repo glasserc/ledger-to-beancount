@@ -64,10 +64,10 @@ def reattach_comment(line, comment):
 
 def translate_account(account):
     # FIXME: we should actually use a whitelist here
-    BAD_CHARS = " ()'."
+    BAD_CHARS = " ()'.&"
     for char in BAD_CHARS:
         account = account.replace(char, '')
-    return re.sub(r'\:(\d)', r':X\1', account)
+    return re.sub(r'\:([\da-z])', r':X\1', account)
 
 
 def strip_currency(amount):
