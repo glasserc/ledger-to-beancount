@@ -5,7 +5,7 @@ def main():
     filename = sys.argv[1]
     try:
         output = translate_file(open(filename).readlines())
-        print(''.join([line + '\n' for line in output]))
+        print('\n'.join(output))
         return 0
     except BalanceAssertionTooComplicated as e:
         print("Balance assertion with leftovers on line {}.".format(e.lineno))
