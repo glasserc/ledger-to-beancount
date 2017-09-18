@@ -28,7 +28,7 @@ everything in the original Ledger file.
 
 ::
 
-  $ pip install https://github.com/glasserc/ledger-to-beancount.git
+  $ pip install git+https://github.com/glasserc/ledger-to-beancount.git
 
 Run with::
 
