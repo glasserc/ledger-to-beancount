@@ -86,9 +86,9 @@ def translate_amount(amount):
     def replace_number(currency, match):
         amount = Decimal(match.group(1))
         return '{} {}'.format(str(amount), currency)
-    amount = re.sub(r'\$' + amount_re, partial(replace_number, 'USD'), amount)
-    amount = re.sub(r'€' + amount_re, partial(replace_number, 'EUR'), amount)
-    amount = re.sub(r'₤' + amount_re, partial(replace_number, 'GBP'), amount)
+    amount = re.sub(r'\$\s?' + amount_re, partial(replace_number, 'USD'), amount)
+    amount = re.sub(r'€\s?' + amount_re, partial(replace_number, 'EUR'), amount)
+    amount = re.sub(r'₤\s?' + amount_re, partial(replace_number, 'GBP'), amount)
     return amount
 
 

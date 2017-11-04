@@ -158,6 +158,23 @@ def test_currency_is_translated():
       Assets:Cash
     """)
 
+def test_currency_with_spaces_is_translated():
+    """$ 40 -> 40 USD"""
+    input = from_triple_quoted_string("""
+    2017-01-02 An ordinary transaction
+        Expenses:Restaurants    $ 40
+        Assets:Cash
+    """)
+    output = translate_file(input)
+    assert output == from_triple_quoted_string("""
+    * Accounts
+    2010-01-01 open Assets:Cash
+    2010-01-01 open Expenses:Restaurants
+    * Transactions
+    2017-01-02 * "An ordinary transaction"
+      Expenses:Restaurants        40 USD
+      Assets:Cash
+    """)
 
 def test_negative_currency_is_translated():
     """$-40 -> -40 USD, as is -$40"""
