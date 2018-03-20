@@ -35,6 +35,8 @@ def starts_transaction(line):
     date = line
     if ' ' in line:
         (date, rest) = line.split(' ', 1)
+        # Strip aux date
+        date = date.split('=', 1)[0]
     try:
         date = dateutil.parser.parse(date)
     except ValueError:
@@ -199,6 +201,7 @@ def translate_file(file_lines):
             rest = ''
             if ' ' in significant:
                 date, rest = significant.split(' ', 1)
+            date = date.split('=', 1)[0]
             date = dateutil.parser.parse(date)
             new_transaction = "{} * \"{}\"".format(date.date(), rest.replace('"', '\\"'))
             current_entry.append(reattach_comment(new_transaction, comment))
