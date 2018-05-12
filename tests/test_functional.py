@@ -158,6 +158,7 @@ def test_currency_is_translated():
       Assets:Cash
     """)
 
+
 def test_currency_with_spaces_is_translated():
     """$ 40 -> 40 USD"""
     input = from_triple_quoted_string("""
@@ -175,6 +176,7 @@ def test_currency_with_spaces_is_translated():
       Expenses:Restaurants        40 USD
       Assets:Cash
     """)
+
 
 def test_negative_currency_is_translated():
     """$-40 -> -40 USD, as is -$40"""
@@ -399,6 +401,7 @@ def test_translate_dates():
       Assets:Cash
     """)
 
+
 def test_translate_dates():
     input = from_triple_quoted_string("""
     2/6/2010 An ordinary transaction
@@ -412,6 +415,30 @@ def test_translate_dates():
     2010-01-01 open Expenses:Restaurants
     * Transactions
     2010-02-06 * "An ordinary transaction"
+      Expenses:Restaurants        40 USD
+      Assets:Cash
+    """)
+
+
+def test_flags_are_parsed():
+    input = from_triple_quoted_string("""
+    2/6/2010 ! An ordinary transaction
+        Expenses:Restaurants    $40
+        Assets:Cash
+    2/6/2010 * A cleared transaction
+        Expenses:Restaurants    $40
+        Assets:Cash
+    """)
+    output = translate_file(input)
+    assert output == from_triple_quoted_string("""
+    * Accounts
+    2010-01-01 open Assets:Cash
+    2010-01-01 open Expenses:Restaurants
+    * Transactions
+    2010-02-06 ! "An ordinary transaction"
+      Expenses:Restaurants        40 USD
+      Assets:Cash
+    2010-02-06 * "A cleared transaction"
       Expenses:Restaurants        40 USD
       Assets:Cash
     """)

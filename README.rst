@@ -50,7 +50,7 @@ Given a .ledger file like this::
       Expenses:Clothing       $100
       Liabilities:Credit Card
 
-  2010-02-05 Buying dinner at a Thai place
+  2010-02-05 ! Buying dinner at a Thai place
       Expenses:Restaurant
       Liabilities:Credit Card  $40
       Assets:Cash             $10   ; for the tip
@@ -79,7 +79,7 @@ The converter outputs::
     Expenses:Clothing        100 USD
     Liabilities:CreditCard
 
-  2010-02-05 * "Buying dinner at a Thai place"
+  2010-02-05 ! "Buying dinner at a Thai place"
     Expenses:Restaurant
     Liabilities:CreditCard      40 USD
     Assets:Cash        10 USD   ; for the tip
@@ -102,6 +102,9 @@ In other words:
 
 - Transactions are converted to beancount format, i.e. with payees
   quoted (and escaped if necessary).
+
+- Flags are preserved, but since every transaction has to have a flag,
+  we default to the "*" flag for any unflagged transactions.
 
 - Comments are preserved, even in tricky cases like at the end of a posting.
 

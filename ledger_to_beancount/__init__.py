@@ -198,12 +198,21 @@ def translate_file(file_lines):
 
         if starts_transaction(significant):
             date = significant
-            rest = ''
+            narration = ''
             if ' ' in significant:
-                date, rest = significant.split(' ', 1)
+                date, narration = significant.split(' ', 1)
             date = date.split('=', 1)[0]
             date = dateutil.parser.parse(date)
-            new_transaction = "{} * \"{}\"".format(date.date(), rest.replace('"', '\\"'))
+
+            flag = '*'
+            if narration[0] in ['!', '*']:
+                flag = narration[0]
+                narration = narration[1:].strip()
+
+            new_transaction = "{date} {flag} \"{narration}\"".format(
+                date=date.date(), flag=flag,
+                narration=narration.replace('"', '\\"'))
+
             current_entry.append(reattach_comment(new_transaction, comment))
 
         elif significant.startswith('alias'):
