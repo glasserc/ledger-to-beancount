@@ -1,6 +1,9 @@
 import pytest
 
-from ledger_to_beancount import translate_file, BalanceAssertionTooComplicated
+from ledger_to_beancount import (
+    translate_file, BalanceAssertionTooComplicated,
+    InvalidCommodityError
+)
 
 
 def from_triple_quoted_string(s, append_newlines=False):
@@ -480,3 +483,30 @@ def test_backwards_commodities_are_OK():
     """)
 
 
+def test_strip_quoted_commodities():
+    input = from_triple_quoted_string("""
+    2/6/2010 An ordinary transaction
+        Expenses:Restaurants    40 "PDX"
+        Assets:Cash
+    """)
+    output = translate_file(input)
+    assert output == from_triple_quoted_string("""
+    * Accounts
+    2010-01-01 open Assets:Cash
+    2010-01-01 open Expenses:Restaurants
+    * Transactions
+    2010-02-06 * "An ordinary transaction"
+      Expenses:Restaurants        40 PDX
+      Assets:Cash
+    """)
+
+
+
+def test_barf_on_commodities_with_numbers():
+    input = from_triple_quoted_string("""
+    2/6/2010 An ordinary transaction
+        Expenses:Restaurants    40 "PDX4U"
+        Assets:Cash
+    """)
+    with pytest.raises(InvalidCommodityError):
+        output = translate_file(input)

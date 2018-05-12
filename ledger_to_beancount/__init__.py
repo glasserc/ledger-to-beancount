@@ -29,6 +29,14 @@ class BalanceAssertionTooComplicated(Exception):
         self.lineno = lineno
 
 
+class InvalidCommodityError(Exception):
+    """Exception signaling that beancount won't support this commodity.
+
+    """
+    def __init__(self, unit):
+        self.unit = unit
+
+
 def starts_transaction(line):
     # Check if a line looks like a plausible beginning to a transaction
     if not line:  # blank lines never start transactions
@@ -115,7 +123,13 @@ def translate_amount(amount):
     amount = re.sub(r'€\s?' + amount_re, partial(replace_number, 'EUR'), amount)
     amount = re.sub(r'₤\s?' + amount_re, partial(replace_number, 'GBP'), amount)
 
-    return ' '.join(parse_amount_and_units(amount))
+    (amount, units) = parse_amount_and_units(amount)
+    # Ledger supports "quoted" commodities, which can support numbers.
+    # Beancount only supports words.
+    units = units.strip('"')
+    if not re.match('^[^\W\d_]+$', units):
+        raise InvalidCommodityError(units)
+    return ' '.join([amount, units])
 
 
 def translate_file(file_lines):
