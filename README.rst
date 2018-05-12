@@ -4,6 +4,10 @@
 
 Another ledger-to-beancount converter.
 
+N.B. Maintenance on this project is likely to be minimal. If this
+  program doesn't support some ledger syntax that you use, consider
+  using https://github.com/zacchiro/ledger2beancount instead.
+
 `plaintextaccounting
 <http://plaintextaccounting.org/#data-importconversion>`_ contains a
 link to `a Github gist called ledger2beancount.py
