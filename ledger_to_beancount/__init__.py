@@ -1,3 +1,4 @@
+import decimal
 from decimal import Decimal
 import functools
 import re
@@ -83,6 +84,7 @@ def strip_currency(amount):
 
 
 def translate_amount(amount):
+    amount = amount.strip()
     amount_re = r'(-?(\d*(\.\d+)?))'
     partial = functools.partial
     def replace_number(currency, match):
@@ -91,6 +93,14 @@ def translate_amount(amount):
     amount = re.sub(r'\$\s?' + amount_re, partial(replace_number, 'USD'), amount)
     amount = re.sub(r'€\s?' + amount_re, partial(replace_number, 'EUR'), amount)
     amount = re.sub(r'₤\s?' + amount_re, partial(replace_number, 'GBP'), amount)
+
+    if ' ' in amount:
+        (amount, currency) = amount.split()
+        try:
+            Decimal(amount)
+        except decimal.InvalidOperation:
+            currency, amount = amount, currency
+        amount = ' '.join([amount, currency])
     return amount
 
 
@@ -160,6 +170,7 @@ def translate_file(file_lines):
             elif rest and '@' in rest:
                 # Could be a purchase or sale.
                 (amount, price) = rest.split('@')
+                amount = amount.strip()
                 if amount == translate_amount(amount):
                     # Seems really likely to be a commodity
                     translated_amount = translate_amount(amount)

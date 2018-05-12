@@ -442,3 +442,22 @@ def test_flags_are_parsed():
       Expenses:Restaurants        40 USD
       Assets:Cash
     """)
+
+
+def test_backwards_currencies_are_OK():
+    input = from_triple_quoted_string("""
+    2/6/2010 An ordinary transaction
+        Expenses:Restaurants    USD 40
+        Assets:Cash
+    """)
+    output = translate_file(input)
+    assert output == from_triple_quoted_string("""
+    * Accounts
+    2010-01-01 open Assets:Cash
+    2010-01-01 open Expenses:Restaurants
+    * Transactions
+    2010-02-06 * "An ordinary transaction"
+      Expenses:Restaurants        40 USD
+      Assets:Cash
+    """)
+
