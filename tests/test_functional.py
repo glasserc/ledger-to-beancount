@@ -424,24 +424,6 @@ def test_translate_dates():
     """)
 
 
-def test_translate_dates():
-    input = from_triple_quoted_string("""
-    2/6/2010 An ordinary transaction
-        Expenses:Restaurants    $40
-        Assets:Cash
-    """)
-    output = translate_file(input)
-    assert output == from_triple_quoted_string("""
-    * Accounts
-    2010-01-01 open Assets:Cash
-    2010-01-01 open Expenses:Restaurants
-    * Transactions
-    2010-02-06 * "An ordinary transaction"
-      Expenses:Restaurants        40 USD
-      Assets:Cash
-    """)
-
-
 def test_flags_are_parsed():
     input = from_triple_quoted_string("""
     2/6/2010 ! An ordinary transaction
@@ -520,7 +502,6 @@ def test_strip_quoted_commodities():
     """)
 
 
-
 def test_barf_on_commodities_with_numbers():
     input = from_triple_quoted_string("""
     2/6/2010 An ordinary transaction
@@ -528,4 +509,4 @@ def test_barf_on_commodities_with_numbers():
         Assets:Cash
     """)
     with pytest.raises(InvalidCommodityError):
-        output = translate_file(input)
+        translate_file(input)
