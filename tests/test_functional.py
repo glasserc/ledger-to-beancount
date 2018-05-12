@@ -461,3 +461,22 @@ def test_backwards_currencies_are_OK():
       Assets:Cash
     """)
 
+
+def test_backwards_commodities_are_OK():
+    input = from_triple_quoted_string("""
+    2/6/2010 An ordinary transaction
+        Expenses:Restaurants    PDX 40 @ $1
+        Assets:Cash
+    """)
+    output = translate_file(input)
+    assert output == from_triple_quoted_string("""
+    * Accounts
+    2010-01-01 open Assets:Cash
+    2010-01-01 open Expenses:Restaurants
+    * Transactions
+    2010-02-06 * "An ordinary transaction"
+      Expenses:Restaurants        40 PDX {1 USD}
+      Assets:Cash
+    """)
+
+

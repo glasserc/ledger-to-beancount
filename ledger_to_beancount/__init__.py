@@ -83,8 +83,29 @@ def strip_currency(amount):
     return amount
 
 
-def translate_amount(amount):
+def parse_amount_and_units(amount):
     amount = amount.strip()
+    if ' ' in amount:
+        (amount, units) = amount.split(' ', 1)
+        try:
+            Decimal(amount)
+        except decimal.InvalidOperation:
+            units, amount = amount, units
+        return (amount, units)
+
+
+def identify_commodity(amount):
+    amount = amount.strip()
+    if re.match('\$|€|₤', amount):
+        return False
+    amount, commodity = parse_amount_and_units(amount)
+    if commodity in ['USD', 'EUR', 'GBP', 'CAD']:
+        return False
+
+    return commodity
+
+
+def translate_amount(amount):
     amount_re = r'(-?(\d*(\.\d+)?))'
     partial = functools.partial
     def replace_number(currency, match):
@@ -94,14 +115,7 @@ def translate_amount(amount):
     amount = re.sub(r'€\s?' + amount_re, partial(replace_number, 'EUR'), amount)
     amount = re.sub(r'₤\s?' + amount_re, partial(replace_number, 'GBP'), amount)
 
-    if ' ' in amount:
-        (amount, currency) = amount.split()
-        try:
-            Decimal(amount)
-        except decimal.InvalidOperation:
-            currency, amount = amount, currency
-        amount = ' '.join([amount, currency])
-    return amount
+    return ' '.join(parse_amount_and_units(amount))
 
 
 def translate_file(file_lines):
@@ -170,9 +184,8 @@ def translate_file(file_lines):
             elif rest and '@' in rest:
                 # Could be a purchase or sale.
                 (amount, price) = rest.split('@')
-                amount = amount.strip()
-                if amount == translate_amount(amount):
-                    # Seems really likely to be a commodity
+                # Translate commodity purchase/sales
+                if identify_commodity(amount):
                     translated_amount = translate_amount(amount)
                     number, units = translated_amount.strip().split(' ')
                     if Decimal(number) > 0:
