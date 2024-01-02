@@ -83,7 +83,7 @@ def translate_account(account):
 
 def strip_currency(amount):
     amount.strip()
-    if amount[0] in ('$', '€', '₤'):
+    if amount[0] in ('$', '€', '£'):
         amount = amount[1:]
 
     if ' ' in amount:
@@ -104,7 +104,7 @@ def parse_amount_and_units(amount):
 
 def identify_commodity(amount):
     amount = amount.strip()
-    if re.match('\$|€|₤', amount):
+    if re.match('\$|€|£', amount):
         return False
     amount, commodity = parse_amount_and_units(amount)
     if commodity in ['USD', 'EUR', 'GBP', 'CAD']:
